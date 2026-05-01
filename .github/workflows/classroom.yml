@@ -1,0 +1,62 @@
+name: Autograding Tests
+'on':
+- push
+- repository_dispatch
+permissions:
+  checks: write
+  actions: read
+  contents: read
+jobs:
+  run-autograding-tests:
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-classroom[bot]'
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Checks "Engineering"
+      id: checks-engineering
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Checks "Engineering"
+        setup-command: sed -i 's/String targetWord = .*/String targetWord = "Engineering";/'
+          src/Main.java
+        command: javac src/Main.java && java -cp src Main
+        input: ''
+        expected-output: The word 'Engineering' contains 5 vowels.
+        comparison-method: contains
+        timeout: 2
+        max-score: 33
+    - name: Checks "Rhythm"
+      id: checks-rhythm
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Checks "Rhythm"
+        setup-command: sed -i 's/String targetWord = .*/String targetWord = "Rhythm";/'
+          src/Main.java
+        command: javac src/Main.java && java -cp src Main
+        input: ''
+        expected-output: The word 'Rhythm' contains 0 vowels.
+        comparison-method: contains
+        timeout: 2
+        max-score: 33
+    - name: Checks "AouEI"
+      id: checks-aouei
+      uses: classroom-resources/autograding-io-grader@v1
+      with:
+        test-name: Checks "AouEI"
+        setup-command: sed -i 's/String targetWord = .*/String targetWord = "AouEI";/'
+          src/Main.java
+        command: javac src/Main.java && java -cp src Main
+        input: ''
+        expected-output: The word 'AouEI' contains 5 vowels.
+        comparison-method: contains
+        timeout: 2
+        max-score: 34
+    - name: Autograding Reporter
+      uses: classroom-resources/autograding-grading-reporter@v1
+      env:
+        CHECKS-ENGINEERING_RESULTS: "${{steps.checks-engineering.outputs.result}}"
+        CHECKS-RHYTHM_RESULTS: "${{steps.checks-rhythm.outputs.result}}"
+        CHECKS-AOUEI_RESULTS: "${{steps.checks-aouei.outputs.result}}"
+      with:
+        runners: checks-engineering,checks-rhythm,checks-aouei
